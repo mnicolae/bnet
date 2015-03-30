@@ -318,8 +318,16 @@ def restrict_factor(f, var, value):
 def sum_out_variable(f, var):
     '''return a new factor that is the product of the factors in Factors
        followed by the suming out of Var'''
+    newName = f.name + "_sum_out"
+    varIndex = f.get_scope().index(var)
+    newScope = f.get_scope()
+    newScope.remove(var)
+    newFactor = Factor(newName, newScope)
+    newValues = []
+    # TODO: init newValues
 
-       #You must implement this function
+    newFactor.add_values(newValues)
+    return newFactor
 
 ###Ordering
 
