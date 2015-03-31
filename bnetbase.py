@@ -496,5 +496,16 @@ def VE(Net, QueryVar, EvidenceVars):
    Pr(A='a'|B=1, C='c') = 0.26
  
     '''
+    # Assign the evidence variables to their observed values.
+    for f in Net.factors():
+        restrictVars = []
+        for var in f.scope():
+            if var in EvidenceVars:
+                restrictVars.append(var)
+        for rvar in restrictVars:
+            f = restrict_factor(f, rvar, rvar.get_evidence())
+    
+    # Decompose the sum
+    
     #You must implement this function
 
