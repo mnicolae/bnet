@@ -126,11 +126,11 @@ class Factor:
     probabilities. Nevertheless, they still map assignments of values
     to the variables in their scope to numbers.
 
-    Note that if the factor's scope is empty it is a constaint factor
+    Note that if the factor's scope is empty it is a constraint factor
     that stores only one value. add_values would be passed something
     like [[0.25]] to set the factor's single value. The get_value
     functions will still work.  E.g., get_value([]) will return the
-    factor's single value. Constaint factors migth be created when a
+    factor's single value. Constraint factors might be created when a
     factor is restricted.'''
 
     def __init__(self, name, scope):
@@ -299,35 +299,115 @@ class BN:
     def variables(self):
         return list(self.Variables)
 
-
 def multiply_factors(Factors):
-    '''return a new factor that is the product of the factors in Fators'''
-    #You must implement this function
+    '''return a new factor that is the product of the factors in Factors'''
+    if len(Factors) == 1:
+        return Factors[0]
+    elif len(Factors) == 2:
+        return multiply_two_factors(Factors[0], Factors[1])
+    else:
+        newFactors = []
+        newFactors.append(multiply_two_factors(Factors[0], Factors[1]))
+        newFactors += Factors[2:]
+        return multiply_factors(newFactors)
 
+def multiply_two_factors(f1, f2):
+    newName = f1.name + "_multiply_" + f2.name
+    mergedVars = f1.get_scope()
+    for var in f2.get_scope():
+        if var not in f1.get_scope():
+            mergedVars.append(var)
+    newFactor = Factor(newName, mergedVars)
+    newValues = []
 
+    saved_values = []  #save and then restore the variable assigned values.
+    for v in mergedVars:
+        saved_values.append(v.get_assignment_index())
+
+    multiply_two_factors_rec(f1, f2, mergedVars, newValues)
+
+    for v in mergedVars:
+        v.set_assignment_index(saved_values[0])
+        saved_values = saved_values[1:]
+
+    newFactor.values = newValues
+    return newFactor
+
+def multiply_two_factors_rec(f1, f2, mergedVars, newValues):
+    if len(mergedVars) == 0:
+        newValues.append(f1.get_value_at_current_assignments() * f2.get_value_at_current_assignments())
+    else:
+        for val in mergedVars[0].domain():
+            mergedVars[0].set_assignment(val)
+            multiply_two_factors_rec(f1, f2, mergedVars[1:], newValues)
 
 def restrict_factor(f, var, value):
-
     '''f is a factor, var is a Variable, and value is a value from var.domain.
     Return a new factor that is the restriction of f by this var = value.
     Don't change f! If f has only one variable its restriction yields a
     constant factor'''
-
-    #You must implement this function
-
-def sum_out_variable(f, var):
-    '''return a new factor that is the product of the factors in Factors
-       followed by the suming out of Var'''
-    newName = f.name + "_sum_out"
-    varIndex = f.get_scope().index(var)
+    newName = f.name + "_restrict_" + var.name + "_" + value
     newScope = f.get_scope()
     newScope.remove(var)
     newFactor = Factor(newName, newScope)
     newValues = []
-    # TODO: init newValues
 
-    newFactor.add_values(newValues)
+    saved_values = []  #save and then restore the variable assigned values.
+    for v in f.scope:
+        saved_values.append(v.get_assignment_index())
+
+    # set this variable's assignment value for factor lookup
+    var.set_assignment(value)
+    restrict_factor_rec(f, newScope, newValues)
+
+    for v in f.scope:
+        v.set_assignment_index(saved_values[0])
+        saved_values = saved_values[1:]
+
+    newFactor.values = newValues
     return newFactor
+
+def restrict_factor_rec(oldFactor, newScope, newValues):
+    if len(newScope) == 0:
+        newValues.append(oldFactor.get_value_at_current_assignments())
+    else:
+        for val in newScope[0].domain():
+            newScope[0].set_assignment(val)
+            restrict_factor_rec(oldFactor, newScope[1:], newValues)
+
+def sum_out_variable(f, var):
+    '''return a new factor that is the product of the factors in Factors
+       followed by the suming out of Var'''
+    newName = f.name + "_sum_out_" + var.name
+    newScope = f.get_scope()
+    newScope.remove(var)
+    newFactor = Factor(newName, newScope)
+    newValuesSize = round(len(f.values) / var.domain_size())
+    newValues = [0] * newValuesSize
+
+    saved_values = []  #save and then restore the variable assigned values.
+    for v in f.scope:
+        saved_values.append(v.get_assignment_index())
+
+    for val in var.domain():
+        var.set_assignment(val)
+        sum_out_variable_rec(f, newScope, newValues, 0)
+
+    for v in f.scope:
+        v.set_assignment_index(saved_values[0])
+        saved_values = saved_values[1:]
+
+    newFactor.values = newValues
+    return newFactor
+
+def sum_out_variable_rec(oldFactor, newScope, newValues, index):
+    if len(newScope) == 0:
+        newValues[index] += oldFactor.get_value_at_current_assignments()
+    else:
+        for val in newScope[0].domain():
+            newScope[0].set_assignment(val)
+            index = index * newScope[0].domain_size() + newScope[0].get_assignment_index()
+            sum_out_variable_rec(oldFactor, newScope[1:], newValues, index)
 
 ###Ordering
 
