@@ -528,6 +528,6 @@ def VE(Net, QueryVar, EvidenceVars):
     multipliedFactor = multiply_factors(factors)
 
     # normalize the distribution
-    normalizedDistr = [float(i)/sum(multipliedFactor.values) for i in multipliedFactor.values]
+    normalizedDistr = [0 if sum(multipliedFactor.values) == 0 else i / sum(multipliedFactor.values) for i in multipliedFactor.values]
 
     return normalizedDistr
