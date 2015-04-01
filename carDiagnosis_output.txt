@@ -1,0 +1,79 @@
+Variable: Alternator
+P(Alternator = okay) = 99.7
+P(Alternator = faulty) = 0.3
+
+Variable: Charging system
+P(Charging system = okay) = 49.9
+P(Charging system = faulty) = 50.1
+
+Variable: Battery age
+P(Battery age = new) = 40.0
+P(Battery age = old) = 40.0
+P(Battery age = very_old) = 20.0
+
+Variable: Battery voltage
+P(Battery voltage = strong) = 41.1
+P(Battery voltage = weak) = 17.8
+P(Battery voltage = dead) = 41.0
+
+Variable: Main fuse
+P(Main fuse = okay) = 99.0
+P(Main fuse = blown) = 1.0
+
+Variable: Distributer
+P(Distributer = okay) = 99.0
+P(Distributer = faulty) = 1.0
+
+Variable: Voltage at plug
+P(Voltage at plug = strong) = 36.3
+P(Voltage at plug = weak) = 17.8
+P(Voltage at plug = none) = 45.9
+
+Variable: Starter Motor
+P(Starter Motor = okay) = 99.5
+P(Starter Motor = faulty) = 0.5
+
+Variable: Starter system
+P(Starter system = okay) = 59.6
+P(Starter system = faulty) = 40.4
+
+Variable: Headlights
+P(Headlights = bright) = 38.7
+P(Headlights = dim) = 17.3
+P(Headlights = off) = 44.0
+
+Variable: Spark plugs
+P(Spark plugs = okay) = 70.0
+P(Spark plugs = too_wide) = 10.0
+P(Spark plugs = fouled) = 20.0
+
+Variable: Spark quality
+P(Spark quality = good) = 25.4
+P(Spark quality = bad) = 23.3
+P(Spark quality = very_bad) = 51.2
+
+Variable: Car cranks
+P(Car cranks = true) = 49.7
+P(Car cranks = false) = 50.3
+
+Variable: Spark timing
+P(Spark timing = good) = 89.3
+P(Spark timing = bad) = 9.2
+P(Spark timing = very_bad) = 1.5
+
+Variable: Fuel system
+P(Fuel system = okay) = 90.0
+P(Fuel system = faulty) = 10.0
+
+Variable: Air filter
+P(Air filter = clean) = 90.0
+P(Air filter = dirty) = 10.0
+
+Variable: Air system
+P(Air system = okay) = 84.0
+P(Air system = faulty) = 16.0
+
+Variable: Car starts
+P(Car starts = true) = 28.0
+P(Car starts = false) = 72.0
+
