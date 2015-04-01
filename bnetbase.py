@@ -356,7 +356,6 @@ def restrict_factor(f, var, value):
     for v in f.scope:
         saved_values.append(v.get_assignment_index())
 
-    # set this variable's assignment value for factor lookup
     var.set_assignment(value)
     restrict_factor_rec(f, newScope, newValues)
 
@@ -381,9 +380,10 @@ def sum_out_variable(f, var):
     newName = f.name + "_sum_out_" + var.name
     newScope = f.get_scope()
     newScope.remove(var)
+    newScopeCopy = list(newScope)
     newFactor = Factor(newName, newScope)
     newValuesSize = round(len(f.values) / var.domain_size())
-    newValues = [0] * newValuesSize
+    newValues = [0.0] * newValuesSize
 
     saved_values = []  #save and then restore the variable assigned values.
     for v in f.scope:
@@ -391,7 +391,7 @@ def sum_out_variable(f, var):
 
     for val in var.domain():
         var.set_assignment(val)
-        sum_out_variable_rec(f, newScope, newValues, 0)
+        sum_out_variable_rec(f, newScope, newScopeCopy, newValues)
 
     for v in f.scope:
         v.set_assignment_index(saved_values[0])
@@ -400,17 +400,16 @@ def sum_out_variable(f, var):
     newFactor.values = newValues
     return newFactor
 
-def sum_out_variable_rec(oldFactor, newScope, newValues, index):
+def sum_out_variable_rec(oldFactor, newScope, newScopeCopy, newValues):
     if len(newScope) == 0:
-        newValues[index] += oldFactor.get_value_at_current_assignments()
         index = 0
+        for var in newScopeCopy:
+            index = index * var.domain_size() + var.get_assignment_index()
+        newValues[index] += oldFactor.get_value_at_current_assignments()
     else:
         for val in newScope[0].domain():
             newScope[0].set_assignment(val)
-            index = index * newScope[0].domain_size() + newScope[0].get_assignment_index()
-            sum_out_variable_rec(oldFactor, newScope[1:], newValues, index)
-            if len(newScope[1:]) == 0:
-                index = 0
+            sum_out_variable_rec(oldFactor, newScope[1:], newScopeCopy, newValues)
 
 ###Ordering
 
@@ -475,8 +474,7 @@ def remove_var(var, new_scope, scopes):
             new_scopes.append(s)
     new_scopes.append(new_scope)
     return new_scopes
-            
-        
+
 ###
 def VE(Net, QueryVar, EvidenceVars):
     '''
@@ -503,12 +501,11 @@ def VE(Net, QueryVar, EvidenceVars):
     variables = Net.variables()
 
     # Assign the evidence variables to their observed values.
-    for var in EvidenceVars:
-        for f in factors:
-            if var in f.get_scope():
-                newFactor = restrict_factor(f, var, var.get_evidence())
-                factors.append(newFactor)
-                factors.remove(f)
+    for i in range(len(factors)):
+        for var in EvidenceVars:
+            if var in factors[i].get_scope():
+                newFactor = restrict_factor(factors[i], var, var.get_evidence())
+                factors[i] = newFactor
 
     # Decompose the sum and sum out all vars not involved in the query
     mf_ordering = min_fill_ordering(factors, QueryVar)
@@ -518,86 +515,19 @@ def VE(Net, QueryVar, EvidenceVars):
             if var in f.get_scope():
                 factorsToMultiply.append(f)
                 continue
+
         multipliedFactor = multiply_factors(factorsToMultiply)
         summedOutFactor = sum_out_variable(multipliedFactor, var)
+
         for f in factorsToMultiply:
             factors.remove(f)
         factors.append(summedOutFactor)
         mf_ordering = mf_ordering[1:]
 
-    # Multiply the remaining factors (which only involve the query variable)
+    # Multiply and sum the remaining factors (which only involve the query variable)
     multipliedFactor = multiply_factors(factors)
 
     # normalize the distribution
-    normalizedDistr = [i/max(multipliedFactor.values) for i in multipliedFactor.values]
-    return normalizedDistr
+    normalizedDistr = [float(i)/sum(multipliedFactor.values) for i in multipliedFactor.values]
 
-if __name__ == '__main__':
-    VisitAsia = Variable('Visit_To_Asia', ['visit', 'no-visit'])
-    F1 = Factor("F1", [VisitAsia])
-    F1.add_values([['visit', 0.01], ['no-visit', 0.99]])
-    
-    Smoking = Variable('Smoking', ['smoker', 'non-smoker'])
-    F2 = Factor("F2", [Smoking])
-    F2.add_values([['smoker', 0.5], ['non-smoker', 0.5]])
-    
-    Tuberculosis = Variable('Tuberculosis', ['present', 'absent'])
-    F3 = Factor("F3", [Tuberculosis, VisitAsia])
-    F3.add_values([['present', 'visit', 0.05],
-                   ['present', 'no-visit', 0.01],
-                   ['absent', 'visit', 0.95],
-                   ['absent', 'no-visit', 0.99]])
-    
-    Cancer = Variable('Lung Cancer', ['present', 'absent'])
-    F4 = Factor("F4", [Cancer, Smoking])
-    F4.add_values([['present', 'smoker', 0.10],
-                   ['present', 'non-smoker', 0.01],
-                   ['absent', 'smoker', 0.90],
-                   ['absent', 'non-smoker', 0.99]])
-    
-    Bronchitis = Variable('Bronchitis', ['present', 'absent'])
-    F5 = Factor("F5", [Bronchitis, Smoking])
-    F5.add_values([['present', 'smoker', 0.60],
-                   ['present', 'non-smoker', 0.30],
-                   ['absent', 'smoker', 0.40],
-                   ['absent', 'non-smoker', 0.70]])
-    
-    TBorCA = Variable('Tuberculosis or Lung Cancer', ['true', 'false'])
-    F6 = Factor("F6", [TBorCA, Tuberculosis, Cancer])
-    F6.add_values([['true', 'present', 'present', 1.0],
-                   ['true', 'present', 'absent', 1.0],
-                   ['true', 'absent', 'present', 1.0],
-                   ['true', 'absent', 'absent', 0],
-                   ['false', 'present', 'present', 0],
-                   ['false', 'present', 'absent', 0],
-                   ['false', 'absent', 'present', 0],
-                   ['false', 'absent', 'absent', 1]])
-    
-    
-    Dyspnea = Variable('Dyspnea', ['present', 'absent'])
-    F7 = Factor("F7", [Dyspnea, TBorCA, Bronchitis])
-    F7.add_values([['present', 'true', 'present', 0.9],
-                   ['present', 'true', 'absent', 0.7],
-                   ['present', 'false', 'present', 0.8],
-                   ['present', 'false', 'absent', 0.1],
-                   ['absent', 'true', 'present', 0.1],
-                   ['absent', 'true', 'absent', 0.3],
-                   ['absent', 'false', 'present', 0.2],
-                   ['absent', 'false', 'absent', 0.9]])
-    
-    
-    Xray = Variable('XRay Result', ['abnormal', 'normal'])
-    F8 = Factor("F8", [Xray, TBorCA])
-    F8.add_values([['abnormal', 'true', 0.98],
-                   ['abnormal', 'false', 0.05],
-                   ['normal', 'true', 0.02],
-                   ['normal', 'false', 0.95]])
-    
-    Asia = BN("Asia", [VisitAsia, Smoking, Tuberculosis, Cancer,
-                       Bronchitis, TBorCA, Dyspnea, Xray],
-                       [F1, F2, F3, F4, F5, F6, F7, F8])
-    
-    F6.print_table()
-    n1 = sum_out_variable(F6, TBorCA)
-    n1.print_table()
-    
+    return normalizedDistr
