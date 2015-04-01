@@ -403,11 +403,14 @@ def sum_out_variable(f, var):
 def sum_out_variable_rec(oldFactor, newScope, newValues, index):
     if len(newScope) == 0:
         newValues[index] += oldFactor.get_value_at_current_assignments()
+        index = 0
     else:
         for val in newScope[0].domain():
             newScope[0].set_assignment(val)
             index = index * newScope[0].domain_size() + newScope[0].get_assignment_index()
             sum_out_variable_rec(oldFactor, newScope[1:], newValues, index)
+            if len(newScope[1:]) == 0:
+                index = 0
 
 ###Ordering
 
@@ -435,7 +438,7 @@ def min_fill_ordering(Factors, QueryVar):
 
 def min_fill_var(scopes, Vars):
     '''Given a set of scopes (lists of lists of variables) compute and
-    return the variable with minimum fill in. That the variable that
+    return the variable with minimum fill in. That's the variable that
     generates a factor of smallest scope when eliminated from the set
     of scopes. Also return the new scope generated from eliminating
     that variable.'''
@@ -496,16 +499,35 @@ def VE(Net, QueryVar, EvidenceVars):
    Pr(A='a'|B=1, C='c') = 0.26
  
     '''
-    # Assign the evidence variables to their observed values.
-    for f in Net.factors():
-        restrictVars = []
-        for var in f.scope():
-            if var in EvidenceVars:
-                restrictVars.append(var)
-        for rvar in restrictVars:
-            f = restrict_factor(f, rvar, rvar.get_evidence())
-    
-    # Decompose the sum
-    
-    #You must implement this function
+    factors = Net.factors()
+    variables = Net.variables()
 
+    # Assign the evidence variables to their observed values.
+    for var in EvidenceVars:
+        for f in factors:
+            if var in f.get_scope():
+                newFactor = restrict_factor(f, var, var.get_evidence())
+                factors.append(newFactor)
+                factors.remove(f)
+
+    # Decompose the sum and sum out all vars not involved in the query
+    mf_ordering = min_fill_ordering(factors, QueryVar)
+    for var in mf_ordering:
+        factorsToMultiply = []
+        for f in factors:
+            if var in f.get_scope():
+                factorsToMultiply.append(f)
+                continue
+        multipliedFactor = multiply_factors(factorsToMultiply)
+        summedOutFactor = sum_out_variable(multipliedFactor, var)
+        for f in factorsToMultiply:
+            factors.remove(f)
+        factors.append(summedOutFactor)
+        mf_ordering = mf_ordering[1:]
+
+    # Multiply the remaining factors (which only involve the query variable)
+    multipliedFactor = multiply_factors(factors)
+
+    # normalize the distribution
+    normalizedDistr = [i/max(multipliedFactor.values) for i in multipliedFactor.values]
+    return normalizedDistr
