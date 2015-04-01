@@ -524,7 +524,7 @@ def VE(Net, QueryVar, EvidenceVars):
         factors.append(summedOutFactor)
         mf_ordering = mf_ordering[1:]
 
-    # Multiply and sum the remaining factors (which only involve the query variable)
+    # Multiply the remaining factors (which only involve the query variable)
     multipliedFactor = multiply_factors(factors)
 
     # normalize the distribution
