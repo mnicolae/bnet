@@ -1,4 +1,5 @@
 # bnet
+In this assignment you will implement variable elimination on Bayes Nets.
 
 Programming assignment for CSC384 - Introduction to Artificial Intelligence.
 
