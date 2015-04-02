@@ -1,0 +1,5 @@
+P(st = true | ba = old, sp = okay, tm = bad ss = okay) = 0.5158797404385478
+P(st = false | ba = old, sp = okay, tm = bad ss = okay) = 0.48412025956145227 
+P(bv = strong | cs = okay, al = faulty ) = inf
+P(bv = weak | cs = okay, al = faulty )= inf,
+P(bv = dead | cs = okay, al = faulty ) = inf
