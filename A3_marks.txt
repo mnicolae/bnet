@@ -1,0 +1,62 @@
+====================================================
+g1mihai
+CSC 384 - Assignment 3 Summary
+Total score: 95.0/100.0
+====================================================
+
+Q1
+Score: 71.0/76.0
+====================================================
+example_bn.py base test cases:  18.0/18.0
+	subtest 1 of 6: 3.0/3.0
+	subtest 2 of 6: 3.0/3.0
+	subtest 3 of 6: 3.0/3.0
+	subtest 4 of 6: 3.0/3.0
+	subtest 5 of 6: 3.0/3.0
+	subtest 6 of 6: 3.0/3.0
+A3 Q1 original test cases:  0.0/2.0
+	subtest 1 of 4: 0.0/0.5
+	subtest 2 of 4: 0.0/0.5
+	subtest 3 of 4: 0.0/0.5
+	subtest 4 of 4: 0.0/0.5
+A3 Q1 revised test cases:  16.0/16.0
+	subtest 1 of 4: 4.0/4.0
+	subtest 2 of 4: 4.0/4.0
+	subtest 3 of 4: 4.0/4.0
+	subtest 4 of 4: 4.0/4.0
+multiply_factors test cases:  6.0/6.0
+	subtest 1 of 4: 1.5/1.5
+	subtest 2 of 4: 1.5/1.5
+	subtest 3 of 4: 1.5/1.5
+	subtest 4 of 4: 1.5/1.5
+restrict_factor test cases:  4.5/6.0
+	subtest 1 of 4: 1.5/1.5
+	subtest 2 of 4: 0.0/1.5
+	subtest 3 of 4: 1.5/1.5
+	subtest 4 of 4: 1.5/1.5
+sum_out_variable test cases:  4.5/6.0
+	subtest 1 of 4: 1.5/1.5
+	subtest 2 of 4: 0.0/1.5
+	subtest 3 of 4: 1.5/1.5
+	subtest 4 of 4: 1.5/1.5
+ve_extra_one test cases:  14.0/14.0
+	subtest 1 of 7: 2.0/2.0
+	subtest 2 of 7: 2.0/2.0
+	subtest 3 of 7: 2.0/2.0
+	subtest 4 of 7: 2.0/2.0
+	subtest 5 of 7: 2.0/2.0
+	subtest 6 of 7: 2.0/2.0
+	subtest 7 of 7: 2.0/2.0
+
+Written answers:
+	parts (a)-(d): 8.0/8.0
+	comments: 
+
+Q2
+Score: 24.0/24.0
+====================================================
+	part (a): 6.0/6.0
+	part (b): 6.0/6.0
+	part (c): 6.0/6.0
+	part (d): 6.0/6.0
+	comments: 
